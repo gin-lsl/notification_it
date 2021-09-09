@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugins.GeneratedPluginRegistrant
 
 class MainActivity: FlutterActivity() {
 
@@ -36,7 +36,9 @@ class MainActivity: FlutterActivity() {
 
         println("configure_flutter_engine")
 
-        GeneratedPluginRegister.registerGeneratedPlugins(flutterEngine)
+        GeneratedPluginRegistrant.registerWith(flutterEngine)
+
+
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result ->
@@ -51,5 +53,7 @@ class MainActivity: FlutterActivity() {
 
     private fun handleSendText(intent: Intent) {
         sharedText = intent.getStringExtra(Intent.EXTRA_TEXT).toString()
+
+        println("shared_text: $sharedText")
     }
 }

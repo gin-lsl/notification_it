@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   AwesomeNotifications().initialize('resource://drawable/res_app_icon', [
@@ -9,6 +10,7 @@ void main() {
       channelDescription: 'Base Notification',
       defaultColor: Color(0xff9d50dd),
       ledColor: Colors.white,
+      playSound: false,
     )
   ]);
   runApp(MyApp());
@@ -37,14 +39,34 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 1;
+  static const platform = MethodChannel('app.channel.shared.data');
+  String dataShared = 'No data yet';
 
-  void _createNotification() {
+  @override
+  void initState() {
+    super.initState();
+    getSharedText();
+  }
+
+  void getSharedText() async {
+    var sharedData = await platform.invokeMethod('getSharedText');
+    print('shared_data: $sharedData');
+    if (sharedData != null) {
+      _createNotification(sharedData);
+      setState(() {
+        dataShared = sharedData;
+      });
+    }
+  }
+
+  void _createNotification([String messageBody = 'Simple body']) {
     AwesomeNotifications().createNotification(content: NotificationContent(
       id: 10,
       channelKey: 'base_notification',
-      title: 'Simple Notification',
-      body: 'Simple body',
+      title: 'TODO',
+      body: messageBody,
+      locked: true,
+      showWhen: true,
     ));
   }
 
@@ -54,9 +76,6 @@ class _MyHomePageState extends State<MyHomePage> {
         AwesomeNotifications().requestPermissionToSendNotifications();
       }
     });
-    // setState(() {
-    //   _counter++;
-    // });
   }
 
   @override
@@ -66,24 +85,13 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+        child: Text(dataShared),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _createNotification,
         tooltip: 'Increment',
         child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }
